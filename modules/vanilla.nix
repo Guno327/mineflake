@@ -47,7 +47,7 @@ in
       };
 
       name = mkOption {
-        type = type.str;
+        type = types.str;
         default = "server";
         description = "Name of server, determines sub-dir name";
       };
