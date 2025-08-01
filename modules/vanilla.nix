@@ -83,7 +83,7 @@ in
         };
         script = ''
           cd ${cfg.dir}
-          java ${cfg.flags} -jar ${server-jar}/bin/server.jar
+          ${cfg.java}/bin/java ${cfg.flags} -jar ${server-jar}/bin/server.jar
         '';
       };
     };
