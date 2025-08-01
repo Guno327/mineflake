@@ -2,9 +2,9 @@
   config,
   pkgs,
   lib,
-  vanilla_sources,
   ...
 }: let
+  vanilla_sources = import ../sources/vanilla.nix {inherit pkgs;};
   cfg = config.mineflake.vanilla;
   vanilla-server = pkgs.stdenv.mkDerivation {
     pname = "minecraft-vanilla-server";

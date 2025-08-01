@@ -11,8 +11,6 @@
   }: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
-
-    vanilla_sources = import ./sources/vanilla.nix {inherit pkgs;};
   in {
     nixosModules = {
       vanilla = import ./modules/vanilla.nix;
