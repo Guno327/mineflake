@@ -86,7 +86,7 @@ in
           RemainAfterExit = "no";
         };
         script = ''
-          cd ${cfg.dir}
+          cd ${cfg.dir}/${cfg.name}
           exec ${cfg.java}/bin/java ${cfg.flags} -jar ${server-jar}/bin/server.jar
         '';
       };
