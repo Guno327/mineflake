@@ -79,11 +79,15 @@ in
           Type = "exec";
           User = "minecraft";
           Group = "minecraft";
-          Restart = "always";
+
+          Restart = "on-failure";
+          StandardOutput = "journal";
+          StandardError = "journal";
+          RemainAfterExit = "no";
         };
         script = ''
           cd ${cfg.dir}
-          ${cfg.java}/bin/java ${cfg.flags} -jar ${server-jar}/bin/server.jar
+          exec ${cfg.java}/bin/java ${cfg.flags} -jar ${server-jar}/bin/server.jar
         '';
       };
     };
