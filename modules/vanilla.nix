@@ -26,7 +26,7 @@
 
       chmod +x $out/bin/minecraft-vanilla-server
       wrapProgram $out/bin/minecraft-vanilla-server \
-        --set PATH : ${lib.mkBinPath [cfg.java]}
+        --prefix PATH : ${lib.makeBinPath [cfg.java]}
     '';
   };
 in
@@ -70,19 +70,19 @@ in
         users.minecraft = {
           name = "minecraft";
           isSystemUser = true;
-          home = "${dir}";
+          home = "${cfg.dir}";
           group = "minecraft";
         };
         groups.minecraft = {};
       };
 
       systemd.tmpfiles.rules = [
-        "d ${dir} 774 minecraft minecraft -"
-        "d ${dir}/${name} 774 minecraft minecraft -"
+        "d ${cfg.dir} 774 minecraft minecraft -"
+        "d ${cfg.dir}/${cfg.name} 774 minecraft minecraft -"
       ];
 
       environment.systemPackages = [vanilla-server];
-      systemd.services."minecraft-server-${name}" = {
+      systemd.services."minecraft-server-${cfg.name}" = {
         wantedBy = ["multi-user.target"];
         serviceConfig = {
           Type = "exec";
