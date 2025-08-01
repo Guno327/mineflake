@@ -72,7 +72,7 @@ in
       ];
 
       environment.systemPackages = [server-jar];
-      systemd.services."minecraft-server-${cfg.name}" = {
+      systemd.services."mineflake-server" = {
         enable = true;
         wantedBy = ["multi-user.target"];
         serviceConfig = {
