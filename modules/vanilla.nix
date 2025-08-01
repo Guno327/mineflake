@@ -71,7 +71,7 @@ in
         "d ${cfg.dir}/${cfg.name} 774 minecraft minecraft -"
       ];
 
-      environment.systemPackages = [server-jar];
+      environment.systemPackages = [server-jar cfg.java];
       systemd.services."mineflake-server" = {
         enable = true;
         wantedBy = ["multi-user.target"];
