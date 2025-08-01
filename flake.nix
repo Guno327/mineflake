@@ -13,8 +13,9 @@
     pkgs = nixpkgs.legacyPackages.${system};
 
     vanilla_sources = import ./sources/vanilla.nix {inherit pkgs;};
-    vanilla = import ./modules/vanilla.nix {inherit pkgs vanilla_sources;};
   in {
-    packages.${system}.vanilla = vanilla;
+    nixosModules = {
+      vanilla = import ./modules/vanilla.nix {inherit pkgs vanilla_sources;};
+    };
   };
 }
