@@ -6,27 +6,17 @@
 }: let
   vanilla_sources = import ../sources/vanilla.nix {inherit pkgs;};
   cfg = config.mineflake.vanilla;
-  vanilla-server = pkgs.stdenv.mkDerivation {
-    pname = "minecraft-vanilla-server";
+  server-jar = pkgs.stdenv.mkDerivation {
+    pname = "server-jar";
     version = "${cfg.version}";
 
     jar = vanilla_sources.${cfg.version};
-    buildInputs = [cfg.java pkgs.makeWrapper];
+    buildInputs = [cfg.java];
     phases = ["installPhase"];
 
     installPhase = ''
       mkdir -p $out/bin
       cp $jar $out/bin/server.jar
-
-      cat > $out/bin/minecraft-vanilla-server << 'EOF'
-        #!/bin/sh
-        cd ${cfg.dir}
-        java ${cfg.flags} -jar $out/bin/server.jar
-      EOF
-
-      chmod +x $out/bin/minecraft-vanilla-server
-      wrapProgram $out/bin/minecraft-vanilla-server \
-        --prefix PATH : ${lib.makeBinPath [cfg.java]}
     '';
   };
 in
@@ -81,7 +71,7 @@ in
         "d ${cfg.dir}/${cfg.name} 774 minecraft minecraft -"
       ];
 
-      environment.systemPackages = [vanilla-server];
+      environment.systemPackages = [server-jar];
       systemd.services."minecraft-server-${cfg.name}" = {
         enable = true;
         wantedBy = ["multi-user.target"];
@@ -89,9 +79,12 @@ in
           Type = "exec";
           User = "minecraft";
           Group = "minecraft";
-          ExecStart = "${vanilla-server}/bin/minecraft-vanilla-server";
           Restart = "always";
         };
+        script = ''
+          cd ${cfg.dir}
+          java ${flags} -jar ${server-jar}/bin/server.jar
+        '';
       };
     };
   }
