@@ -83,6 +83,7 @@ in
 
       environment.systemPackages = [vanilla-server];
       systemd.services."minecraft-server-${cfg.name}" = {
+        enable = true;
         wantedBy = ["multi-user.target"];
         serviceConfig = {
           Type = "exec";
