@@ -50,7 +50,7 @@ in
 
       java = mkOption {
         type = types.package;
-        default = pkgs.jdk17;
+        default = pkgs.jdk21;
         description = "Java package to use to run server";
       };
     };
