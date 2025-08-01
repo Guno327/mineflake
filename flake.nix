@@ -15,7 +15,14 @@
     vanilla_sources = import ./sources/vanilla.nix {inherit pkgs;};
   in {
     nixosModules.mineflake = {
-      vanilla = import ./modules/vanilla.nix {inherit pkgs vanilla_sources;};
+      pkgs,
+      vanilla_sources,
+      lib,
+      ...
+    }: {
+      imports = [
+        ./modules/vanilla.nix
+      ];
     };
   };
 }

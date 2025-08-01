@@ -5,7 +5,7 @@
   vanilla_sources,
   ...
 }: let
-  cfg = config.vanilla;
+  cfg = config.mineflake.vanilla;
   vanilla-server = pkgs.stdenv.mkDerivation {
     pname = "minecraft-vanilla-server";
     version = "${cfg.version}";
@@ -31,7 +31,7 @@
   };
 in
   with lib; {
-    options.vanilla = {
+    options.mineflake.vanilla = {
       enable = mkEnableOption "Enable vanilla server";
 
       version = mkOption {
