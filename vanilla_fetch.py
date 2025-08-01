@@ -105,8 +105,8 @@ def write_entry(file: TextIO, version: str, url: str, hash: str) -> None:
 
 def write_module() -> None:
     print("Writing results to nix module")
-    with open("vanilla.nix", "w") as module:
-        module.write("{pkgs ? import <nixpkgs> {} }: {\n")
+    with open("sources/vanilla.nix", "w") as module:
+        module.write("{ pkgs, ... : {\n")
         for version in nix_cache["vanilla"]:
             if version == "latest":
                 write_entry(

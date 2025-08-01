@@ -1,4 +1,4 @@
-{pkgs ? import <nixpkgs> {} }: {
+{ pkgs, ... }: {
 "25w31a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/b966ccab7666a9f0c8c955f022bda8c778830b99/server.jar";
 hash = "sha256-1lx6ijc56z3zlqg489q2mivc3hvgbj56pvnz7vfymlsdf5ps4isw";
