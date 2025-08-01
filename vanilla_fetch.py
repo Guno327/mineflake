@@ -34,7 +34,7 @@ def build_nix_cache(manifest_json: Dict) -> None:
 
         cur_dict = nix_cache["vanilla"][version["id"]] = dict()
         cur_dict["url"] = jar
-        cur_dict["hash"] = "sha256-" + hash
+        cur_dict["sha256"] = hash
         cur_dict["asset_index"] = asset_index
     nix_cache["vanilla"]["latest"] = manifest_json["latest"]["release"]
 
@@ -63,7 +63,7 @@ def update_nix_cache(manifest_json: Dict) -> bool:
             changed = True
             cur_dict = nix_cache["vanilla"][version["id"]] = dict()
             cur_dict["url"] = jar
-            cur_dict["hash"] = "sha256-" + hash
+            cur_dict["sha256"] = hash
             cur_dict["asset_index"] = asset_index
         else:
             try:
@@ -80,7 +80,7 @@ def update_nix_cache(manifest_json: Dict) -> bool:
                 changed = True
                 cur_dict = nix_cache["vanilla"][version["id"]] = dict()
                 cur_dict["url"] = jar
-                cur_dict["hash"] = "sha256-" + hash
+                cur_dict["sha256"] = hash
                 cur_dict["asset_index"] = asset_index
 
     if changed:
@@ -98,7 +98,7 @@ def write_entry(file: TextIO, version: str, url: str, hash: str) -> None:
     file.write(f'"{version}"')
     file.write(" = pkgs.fetchurl {\n")
     file.write(f'url = "{url}";\n')
-    file.write(f'hash = "{hash}";\n')
+    file.write(f'sha256 = "{hash}";\n')
     file.write("};\n\n")
     return
 
