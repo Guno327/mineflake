@@ -14,5 +14,6 @@ in
           p.requests
           p.tqdm
         ]))
+      pkgs.sqlite
     ];
   }
