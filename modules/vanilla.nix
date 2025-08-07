@@ -1,4 +1,4 @@
-{ pkgs, ... } : {
+{ pkgs, ... }: {
 "1.21.4-pre2" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/0d53352b9a13a05b8c314c93418347b6ef38cc52/server.jar";
 sha256 = "165glzlb1ng3l6jq1gnm82bcw9dy26jfzwh5bjdar8z2pch7cc73";
@@ -1399,11 +1399,6 @@ url = "https://piston-data.mojang.com/v1/objects/a14d24f89d5a4ec7521b91909caf4fe
 sha256 = "0cm3m8fw6n4hw56h7fak2wn4fr192w75n0c7aj5ywh7fbhinflfd";
 };
 
-"1.16.4-pre1" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/28eb6f8c4c05eec278e3e7f9f0379a16adbfb91d/server.jar";
-sha256 = "0s64cbrl060di0c43j0qyi9w5ldlyxdgng9pvi3agzal27f3mr8a";
-};
-
 "20w45a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/043ec38297d0ec58abd6f636bc92f5664a8ccecb/server.jar";
 sha256 = "0x9n81mn70wsa9h15b5rgf8mz138dmna10xxqw3wh0igwkfbhiq6";
@@ -2327,11 +2322,6 @@ sha256 = "0dggj8da1zivnpaaw63azq1g8pn58w19j0m9hfadj5g0a2q7f1wr";
 "17w47b" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/9b4e7894906f0b379c7300cff0b3e68a4b9db662/server.jar";
 sha256 = "0b70mx564zp9p09s6a9wc7is4ys8c4h2kijnxg7mpqmdkmvgz23d";
-};
-
-"18w02a" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/950b737e9cefc9f91f286190166f062d6b0e0105/server.jar";
-sha256 = "0c968s4hyrd776n5aaz65hjpbza2aqi13isfng053f7cazw29fsq";
 };
 
 "17w43a" = pkgs.fetchurl {
@@ -3802,6 +3792,21 @@ sha256 = "07q3j5vx95hx1zhad3b3yb6l0d93n4hw6zp8ya2k26l6hfi6qvbr";
 "17w45a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/471b2dfa12e4df234057159ce5ee8320da3c84c1/server.jar";
 sha256 = "0ck0x6pcww9q13f3iqbh0831sikk73rsqfykwg9123nk0qrmjc52";
+};
+
+"" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/31bb40019e8d6e64299abafd743f4d3e1a1a68b2/server.jar";
+sha256 = "08xkp55jmx66wd2wa1bjpi6llhx3y122z0kgsyzq61yw8bjr9v5n";
+};
+
+"1.16.4-pre1" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/28eb6f8c4c05eec278e3e7f9f0379a16adbfb91d/server.jar";
+sha256 = "0s64cbrl060di0c43j0qyi9w5ldlyxdgng9pvi3agzal27f3mr8a";
+};
+
+"18w02a" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/950b737e9cefc9f91f286190166f062d6b0e0105/server.jar";
+sha256 = "0c968s4hyrd776n5aaz65hjpbza2aqi13isfng053f7cazw29fsq";
 };
 
 }

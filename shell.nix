@@ -13,6 +13,7 @@ in
           p.jsondiff
           p.requests
           p.tqdm
+          p.beautifulsoup4
         ]))
       pkgs.sqlite
     ];
