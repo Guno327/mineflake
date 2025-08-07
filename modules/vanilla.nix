@@ -138,7 +138,7 @@ in
               entity-broadcast-range-percentage = mkOption {
                 type = int;
                 default = 100;
-                apply = x: lib.asserts.assertmsg (x >= 10 && x <= 1000) "entity-broadcast-range must be in range 10-1000";
+                apply = x: lib.asserts.assertMsg (x >= 10 && x <= 1000) "entity-broadcast-range must be in range 10-1000";
               };
               force-gamemode = mkOption {
                 type = bool;
@@ -147,7 +147,7 @@ in
               function-permission-level = mkOption {
                 type = int;
                 default = 2;
-                apply = x: lib.asserts.assertmsg (x >= 1 && x <= 4) "function-permission-level must be in range 1-4";
+                apply = x: lib.asserts.assertMsg (x >= 1 && x <= 4) "function-permission-level must be in range 1-4";
               };
               gamemode = mkOption {
                 type = enum ["survival" "creative" "adventure" "spectator"];
@@ -200,7 +200,7 @@ in
               max-world-size = mkOption {
                 type = int;
                 default = 29999984;
-                apply = x: lib.asserts.assertmsg (x >= 1 && x <= 29999984) "max-world-size must be in range 1-29999984";
+                apply = x: lib.asserts.assertMsg (x >= 1 && x <= 29999984) "max-world-size must be in range 1-29999984";
               };
               motd = mkOption {
                 type = str;
@@ -217,7 +217,7 @@ in
               op-permission-level = mkOption {
                 type = int;
                 default = 4;
-                apply = x: lib.asserts.assertmsg (x >= 1 && x <= 4) "op-permission-level must be in range 1-4";
+                apply = x: lib.asserts.assertMsg (x >= 1 && x <= 4) "op-permission-level must be in range 1-4";
               };
               player-idle-timeout = mkOption {
                 type = int;
@@ -278,7 +278,7 @@ in
               simulation-distance = mkOption {
                 type = int;
                 default = 10;
-                apply = x: lib.asserts.assertmsg (x >= 3 && x <= 32) "simultation-distance must be in range 3-32";
+                apply = x: lib.asserts.assertMsg (x >= 3 && x <= 32) "simultation-distance must be in range 3-32";
               };
               snooper-enabled = mkOption {
                 type = bool;
@@ -315,7 +315,7 @@ in
               view-distance = mkOption {
                 type = int;
                 default = 10;
-                apply = x: lib.asserts.assertmsg (x >= 3 && x <= 32) "view-distance must be in range 3-32";
+                apply = x: lib.asserts.assertMsg (x >= 3 && x <= 32) "view-distance must be in range 3-32";
               };
               white-list = mkOption {
                 type = bool;
