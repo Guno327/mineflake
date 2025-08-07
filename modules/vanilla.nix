@@ -193,7 +193,7 @@ in
               };
               max-tick-time = mkOption {
                 type = int;
-                deault = 60000;
+                default = 60000;
               };
               max-world-size = mkOption {
                 type = int.mkCheck (x: x >= 1 && x <= 29999984);
