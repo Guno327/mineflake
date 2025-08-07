@@ -88,4 +88,25 @@ def vanilla_fetch():
         print(f"Updating vanilla table in db: {len(versions)} versions")
         thread_map(handle_version, versions, dynamic_ncols=True)
 
+        # Update/Insert Latest
+        connection = sqlite3.Connection("mineflake.db")
+        connection.row_factory = sqlite3.Row
+        res = connection.execute(
+            "SELECT * FROM vanilla where version=:release", manifest_json["latest"]
+        )
+        rows = res.fetchall()
+
+        if len(rows) == 0:
+            print("Could not find latest version")
+            exit(0)
+        else:
+            row = dict(rows[0])
+            row["version"] = "latest"
+            connection.execute(
+                "INSERT OR REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+                row,
+            )
+            connection.commit()
+        connection.close()
+
     nix.write_vanilla_module()

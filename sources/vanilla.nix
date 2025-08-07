@@ -3804,4 +3804,9 @@ url = "https://launcher.mojang.com/v1/objects/d8321edc9470e56b8ad5c67bbd16beba25
 sha256 = "1lc254znq77wa7rfm8zmjwx2f3wllj00sksql3sl1rxf2rymsa0r";
 };
 
+"latest" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar";
+sha256 = "1rxvgyz969yhc1a0fnwmwwap1c548vpr0a39wx02rgnly2ldjj93";
+};
+
 }
