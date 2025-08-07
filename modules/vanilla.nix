@@ -235,7 +235,7 @@ in
                 type = bool;
                 default = true;
               };
-              query.port = mkOption {
+              "query.port" = mkOption {
                 type = int;
                 default = 25565;
               };
@@ -243,11 +243,11 @@ in
                 type = int;
                 default = 0;
               };
-              rcon.password = mkOption {
+              "rcon.password" = mkOption {
                 type = str;
                 default = "";
               };
-              rcon.port = mkOption {
+              "rcon.port" = mkOption {
                 type = int;
                 default = 25575;
               };
