@@ -1,6 +1,5 @@
 import sqlite3
 from vanilla import vanilla_fetch
-from ftb import ftb_fetch
 from curseforge import curseforge_fetch
 
 
@@ -17,5 +16,4 @@ con.execute(
 con.close()
 
 vanilla_fetch()
-# ftb_fetch()
 # curseforge_fetch()

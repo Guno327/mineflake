@@ -67,7 +67,7 @@ def write_vanilla_module() -> None:
     connection = sqlite3.Connection("mineflake.db")
     connection.row_factory = sqlite3.Row
 
-    with open(f"../modules/vanilla.nix", "w") as file:
+    with open(f"../sources/vanilla.nix", "w") as file:
         res = connection.execute("SELECT * FROM vanilla")
         rows = res.fetchall()
 
@@ -75,24 +75,4 @@ def write_vanilla_module() -> None:
         file.write("{ pkgs, ... }: {\n")
         for row in rows:
             write_entry(file, str(row["version"]), row["url"], row["hash"])
-        file.write("}\n")
-
-
-def write_ftb_module() -> None:
-    connection = sqlite3.Connection("mineflake.db")
-    connection.row_factory = sqlite3.Row
-
-    with open(f"../modules/ftb.nix", "w") as file:
-        res = connection.execute("SELECT * FROM ftb")
-        rows = res.fetchall()
-
-        print(f"Writing {len(rows)} results to module ftb.nix")
-        file.write("{pkgs, ... }: {\n")
-        for row in rows:
-            write_entry(
-                file,
-                str(row["id"]) + ":" + str(row["version"]),
-                row["url"],
-                row["hash"],
-            )
         file.write("}\n")
