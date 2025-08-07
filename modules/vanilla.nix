@@ -67,9 +67,10 @@ in
         description = "Java package to use to run server";
       };
 
+      # Legality reasons, make them type out true
       eula = mkOption {
-        type = types.bool;
-        default = false;
+        type = types.enum ["true" "false"];
+        default = "false";
         description = "Whether to accept the EULA";
       };
 
