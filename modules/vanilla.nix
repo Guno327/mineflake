@@ -15,22 +15,18 @@
     buildInputs = [cfg.java];
     phases = ["installPhase"];
 
+    serverProperties = pkgs.writeText "server.properties" (lib.generators.toKeyValue {} cfg.serverProperties);
+
+    eula = pkgs.writeText "eula.txt" ''
+      #By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).
+      eula=${cfg.eula}
+    '';
+
     installPhase = ''
       mkdir $out
       cp $jar $out/server.jar
-      echo ${lib.generators.toKeyValue {} cfg.serverProperties} > $out/server.properties
-
-      echo <<EOF > $out/eula.txt
-      #By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).
-      eula=${cfg.eula}
-      EOF
-
-      echo <<EOF > $out/start.sh
-      #!/bin/sh
-      exec ${cfg.java}/bin/java ${cfg.flags} -jar server.jar
-      EOF
-
-      chmod +x $out/start.sh
+      cp $serverProperties $out/server.properties
+      cp $eula $out/eula.txt
     '';
   };
 in
@@ -339,12 +335,7 @@ in
         groups.minecraft = {};
       };
 
-      systemd.tmpfiles.rules = [
-        "d ${cfg.dir} 774 minecraft minecraft -"
-        "d ${cfg.dir}/${cfg.name} 774 minecraft minecraft -"
-      ];
-
-      environment.systemPackages = [server cfg.java];
+      environment.systemPackages = [server cfg.java pkgs.udev];
       systemd.services."mineflake-server" = {
         enable = true;
         wantedBy = ["multi-user.target"];
@@ -358,14 +349,18 @@ in
           StandardError = "journal";
           RemainAfterExit = "no";
         };
+
+        path = [pkgs.udev];
+
         preStart = ''
-          cd ${cfg.dir}/${cfg.name}
-          cp -r ${server} ./
+          mkdir -p ${cfg.dir}
+          mkdir -p ${cfg.dir}/${cfg.name}
+          cp -f ${server}/* ${cfg.dir}/${cfg.name}/
         '';
 
         script = ''
           cd ${cfg.dir}/${cfg.name}
-          ./start.sh
+          exec ${cfg.java}/bin/java ${cfg.flags} -jar server.jar nogui
         '';
       };
     };
