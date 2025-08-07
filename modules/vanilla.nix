@@ -75,6 +75,7 @@ in
 
       serverProperties = mkOption {
         description = "Overrides for server.properties file";
+        default = {};
         type = with types;
           submodule {
             options = {
