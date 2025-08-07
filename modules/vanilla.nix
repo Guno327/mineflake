@@ -19,6 +19,11 @@
       cp $jar $out/server.jar
       echo ${lib.generators.toKeyValue {} cfg.serverProperties} > $out/server.properties
 
+      echo <<EOF > $out/eula.txt
+      #By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).
+      eula=${cfg.eula}
+      EOF
+
       echo <<EOF > $out/start.sh
       #!/bin/sh
       exec ${cfg.java}/bin/java ${cfg.flags} -jar server.jar
@@ -62,7 +67,11 @@ in
         description = "Java package to use to run server";
       };
 
-      acceptEULA = mkEnableOption "Accept the EULA";
+      eula = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Whether to accept the EULA";
+      };
 
       serverProperties = mkOption {
         description = "Overrides for server.properties file";
@@ -342,9 +351,7 @@ in
         };
         preStart = ''
           cd ${cfg.dir}/${cfg.name}
-          cp ${server}/server.jar ./
-          cp ${server}/server.properties ./
-          cp ${server}/start.sh ./
+          cp -r ${server} ./
         '';
 
         script = ''
