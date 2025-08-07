@@ -3,9 +3,12 @@ import requests
 import os
 import json
 import sqlite3
+from threading import Lock
 from tqdm.contrib.concurrent import thread_map
 from typing import Dict
 import nix
+
+db_lock: Lock = Lock()
 
 
 def fetch_jar(url: str) -> tuple[str, str] | tuple[None, None]:
@@ -28,8 +31,9 @@ def handle_version(version: Dict):
     if "id" not in version:
         return
 
-    result = connection.execute("SELECT * from vanilla WHERE version=:id", version)
-    rows = result.fetchall()
+    with db_lock:
+        result = connection.execute("SELECT * from vanilla WHERE version=:id", version)
+        rows = result.fetchall()
 
     # New Version
     if len(rows) == 0:
@@ -39,13 +43,14 @@ def handle_version(version: Dict):
         if row["url"] is None:
             return
 
-        row["hash"] = nix.hash_url(row["url"])
+        row["hash"] = nix.hash_native(row["url"], {})
 
-        connection.execute(
-            "INSERT OR IGNORE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
-            row,
-        )
-        connection.commit()
+        with db_lock:
+            connection.execute(
+                "INSERT OR IGNORE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+                row,
+            )
+            connection.commit()
 
     # Existing Version
     else:
@@ -57,18 +62,20 @@ def handle_version(version: Dict):
             return
 
         if new_url != row["url"] or new_asset_index != row["asset_index"]:
-            new_hash = nix.hash_url(new_url)
+            new_hash = nix.hash_native(new_url, {})
 
             row["url"] = new_url
             row["asset_index"] = new_asset_index
             row["hash"] = new_hash
 
-            connection.execute(
-                "REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
-                row,
-            )
-            connection.commit()
-    connection.close()
+            with db_lock:
+                connection.execute(
+                    "REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+                    row,
+                )
+                connection.commit()
+    with db_lock:
+        connection.close()
 
 
 def vanilla_fetch():

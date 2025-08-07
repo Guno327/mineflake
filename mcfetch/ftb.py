@@ -33,7 +33,7 @@ def handle_pack(pack: Dict):
                 f"https://api.feed-the-beast.com/v1/modpacks/public/modpack/{id}/{version["id"]}/server/linux"
             )
             row["asset_index"] = version["sid"]
-            row["hash"] = nix.hash_url(row["url"])
+            row["hash"] = nix.hash_native(row["url"], {})
 
             connection.execute(
                 "INSERT INTO ftb VALUES(:id, :version, :url, :asset_index, :hash)", row
@@ -44,7 +44,7 @@ def handle_pack(pack: Dict):
             row = dict(rows[0])
             if row["asset_index"] != version["sid"]:
                 row["asset_index"] = version["sid"]
-                row["hash"] = nix.hash_url(row["url"])
+                row["hash"] = nix.hash_native(row["url"], {})
 
                 connection.execute(
                     "REPLACE INTO ftb VALUES(:id, :version, :url, :asset_index, :hash)",
@@ -63,6 +63,6 @@ def ftb_fetch():
     packs = manifest_json["props"]["pageProps"]["packs"]
 
     print(f"Updating ftb table in db: {len(packs)} packs")
-    thread_map(handle_pack, packs)
+    thread_map(handle_pack, packs, dynamic_ncols=True)
 
     nix.write_ftb_module()
