@@ -8,7 +8,7 @@
   cfg = config.mineflake.vanilla;
 
   server = pkgs.stdenv.mkDerivation {
-    pname = "server-jar";
+    pname = "mineflake-server";
     version = "${cfg.version}";
 
     jar = vanilla_sources.${cfg.version};
@@ -16,6 +16,7 @@
     phases = ["installPhase"];
 
     installPhase = ''
+      mkdir $out
       cp $jar $out/server.jar
       echo ${lib.generators.toKeyValue {} cfg.serverProperties} > $out/server.properties
 
