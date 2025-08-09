@@ -14,6 +14,7 @@ in
           p.requests
           p.tqdm
           p.beautifulsoup4
+          p.rich
         ]))
       pkgs.sqlite
     ];

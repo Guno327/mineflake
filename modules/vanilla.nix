@@ -8,7 +8,7 @@
   cfg = config.mineflake.vanilla;
 
   server = pkgs.stdenv.mkDerivation {
-    pname = "mineflake-server";
+    pname = "mineflake-vanilla-server";
     version = "${cfg.version}";
 
     jar = vanilla_sources.${cfg.version};

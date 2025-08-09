@@ -6,6 +6,13 @@ from tqdm.contrib.concurrent import thread_map
 from typing import Dict
 
 headers: Dict
+api_key: str
+with open("/home/gunnar/.nixcfg/secrets/cf-api.key") as key_file:
+    api_key = key_file.read().replace("\n", "")
+headers = {
+    "x-api-key": api_key,
+    "Accept": "application/json",
+}
 
 
 def handle_pack(pack: Dict):
@@ -59,14 +66,6 @@ def handle_pack(pack: Dict):
 
 def curseforge_fetch():
     global headers
-
-    api_key: str
-    with open("/home/gunnar/.nixcfg/secrets/cf-api.key") as key_file:
-        api_key = key_file.read().replace("\n", "")
-    headers = {
-        "x-api-key": api_key,
-        "Accept": "application/json",
-    }
 
     session = requests.Session()
     for i in range(0, 9951, 50):

@@ -76,3 +76,11 @@ def write_vanilla_module() -> None:
         for row in rows:
             write_entry(file, str(row["version"]), row["url"], row["hash"])
         file.write("}\n")
+
+
+def write_ftb_module(url: str, hash: str) -> None:
+    with open(f"../sources/ftb.nix", "w") as file:
+        print("Writing ftb.nix module")
+        file.write("{ pkgs, ... }: {\n")
+        write_entry(file, "server-installer", url, hash)
+        file.write("}\n")
