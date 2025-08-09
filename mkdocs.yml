@@ -1,0 +1,5 @@
+site_name: Mineflake Docs
+nav:
+  - About: index.md
+
+theme: readthedocs

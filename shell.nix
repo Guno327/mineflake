@@ -13,6 +13,7 @@ in
           p.requests
           p.beautifulsoup4
           p.rich
+          p.mkdocs
         ]))
       pkgs.sqlite
     ];
