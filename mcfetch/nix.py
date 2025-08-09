@@ -9,7 +9,8 @@ from typing import TextIO
 def hash_native(url, headers):
     # Step 1: Fetch the content
     response = requests.get(url, stream=True, headers=headers)
-    response.raise_for_status()
+    if response.status_code != 200:
+        return None
 
     with open("tmp", "wb") as file:
         file.write(response.content)
