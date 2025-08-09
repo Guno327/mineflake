@@ -256,6 +256,9 @@ def ftb_fetch():
         progress.console.record = True
         pack_task = progress.add_task("Updating ftb table in db...", total=len(packs))
         for pack in packs:
+            # Skip vanilla
+            if pack == 81:
+                continue
             handle_pack(pack, progress)
             progress.update(pack_task, advance=1)
 
