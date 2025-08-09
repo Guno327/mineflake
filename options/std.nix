@@ -1,9 +1,11 @@
 {
-  name,
   lib,
+  pkgs,
   ...
 }:
 with lib; {
+  enable = mkEnableOption "Enable Mineflake server";
+
   version = mkOption {
     type = types.str;
     default = "latest";
@@ -18,8 +20,7 @@ with lib; {
 
   name = lib.mkOption {
     type = lib.types.str;
-    default = name;
-    readOnly = true;
+    default = "server";
     description = "The name of this mineflake instance.";
   };
 
