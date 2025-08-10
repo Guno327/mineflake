@@ -1,6 +1,6 @@
 {lib, ...}:
 with lib; {
-  options.serverProperties = mkOption {
+  serverProperties = mkOption {
     description = "Overrides for server.properties file";
     default = {};
     type = with types;
