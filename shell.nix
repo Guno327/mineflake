@@ -13,7 +13,7 @@ in
           p.requests
           p.beautifulsoup4
           p.rich
-          p.mkdocs
+          p.mkdocs-material
         ]))
       pkgs.sqlite
     ];
