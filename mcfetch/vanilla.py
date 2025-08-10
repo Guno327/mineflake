@@ -1,21 +1,16 @@
 import urllib.request as rq
 import requests
-import os
 import json
 import sqlite3
-from threading import Lock
-from tqdm.contrib.concurrent import thread_map
+from rich.progress import Progress
 from typing import Dict
 import nix
-
-db_lock: Lock = Lock()
 
 
 def fetch_jar(url: str) -> tuple[str, str] | tuple[None, None]:
     raw = requests.get(url)
     if raw.status_code != 200:
-        os.error(f"FETCH FAILED: {raw.status_code}")
-        exit(0)
+        return None, None
     json = raw.json()
 
     try:
@@ -24,33 +19,35 @@ def fetch_jar(url: str) -> tuple[str, str] | tuple[None, None]:
         return None, None
 
 
-def handle_version(version: Dict):
+def handle_version(version: Dict, progress: Progress):
     connection = sqlite3.Connection("mineflake.db")
     connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
 
     if "id" not in version:
         return
 
-    with db_lock:
-        result = connection.execute("SELECT * from vanilla WHERE version=:id", version)
-        rows = result.fetchall()
+    result = cursor.execute("SELECT * from vanilla WHERE version=:id", version)
+    rows = result.fetchall()
 
     # New Version
     if len(rows) == 0:
+        progress.console.log(f"Adding new version {version["id"]}")
+
         row = dict()
         row["version"] = version["id"]
         row["url"], row["asset_index"] = fetch_jar(version["url"])
         if row["url"] is None:
+            progress.console.log("Invalid server jar URL")
             return
 
         row["hash"] = nix.hash_native(row["url"], {})
 
-        with db_lock:
-            connection.execute(
-                "INSERT OR IGNORE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
-                row,
-            )
-            connection.commit()
+        cursor.execute(
+            "INSERT OR IGNORE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+            row,
+        )
+        connection.commit()
 
     # Existing Version
     else:
@@ -59,54 +56,68 @@ def handle_version(version: Dict):
 
         new_url, new_asset_index = fetch_jar(version["url"])
         if new_url is None:
+            progress.console.log("Invalid server jar URL")
             return
 
         if new_url != row["url"] or new_asset_index != row["asset_index"]:
+            progress.console.log(f"Updating existing version {version["id"]}")
             new_hash = nix.hash_native(new_url, {})
 
             row["url"] = new_url
             row["asset_index"] = new_asset_index
             row["hash"] = new_hash
 
-            with db_lock:
-                connection.execute(
-                    "REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
-                    row,
-                )
-                connection.commit()
-    with db_lock:
+            cursor.execute(
+                "REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+                row,
+            )
+            connection.commit()
+        else:
+            progress.console.log(f"Version {version["id"]} is up to date")
+
         connection.close()
 
 
 def vanilla_fetch():
+    global progress
+
     manifest_url = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
     rq.urlretrieve(manifest_url, "cache/manifest.json")
     with open("cache/manifest.json") as manifest:
         manifest_json: Dict = json.load(manifest)
         versions = manifest_json["versions"]
 
-        print(f"Updating vanilla table in db: {len(versions)} versions")
-        thread_map(handle_version, versions, dynamic_ncols=True)
-
-        # Update/Insert Latest
-        connection = sqlite3.Connection("mineflake.db")
-        connection.row_factory = sqlite3.Row
-        res = connection.execute(
-            "SELECT * FROM vanilla where version=:release", manifest_json["latest"]
-        )
-        rows = res.fetchall()
-
-        if len(rows) == 0:
-            print("Could not find latest version")
-            exit(0)
-        else:
-            row = dict(rows[0])
-            row["version"] = "latest"
-            connection.execute(
-                "INSERT OR REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
-                row,
+        with Progress() as progress:
+            progress.console.record = True
+            version_task = progress.add_task(
+                "Updating vanilla table in db...", total=len(versions)
             )
-            connection.commit()
+
+            for version in versions:
+                handle_version(version, progress)
+                progress.update(version_task, advance=1)
+
+            # Update/Insert Latest
+            connection = sqlite3.Connection("mineflake.db")
+            connection.row_factory = sqlite3.Row
+            cursor = connection.cursor()
+            res = cursor.execute(
+                "SELECT * FROM vanilla where version=:release", manifest_json["latest"]
+            )
+            rows = res.fetchall()
+
+            if len(rows) == 0:
+                progress.console.log("ERR: Could not find latest version")
+            else:
+                row = dict(rows[0])
+                row["version"] = "latest"
+                cursor.execute(
+                    "INSERT OR REPLACE INTO vanilla VALUES(:version, :url, :asset_index, :hash)",
+                    row,
+                )
+                connection.commit()
+
+            progress.console.save_text("logs/vanilla.log")
         connection.close()
 
     nix.write_vanilla_module()

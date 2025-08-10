@@ -9,7 +9,8 @@ from typing import TextIO
 def hash_native(url, headers):
     # Step 1: Fetch the content
     response = requests.get(url, stream=True, headers=headers)
-    response.raise_for_status()
+    if response.status_code != 200:
+        return None
 
     with open("tmp", "wb") as file:
         file.write(response.content)
@@ -75,4 +76,12 @@ def write_vanilla_module() -> None:
         file.write("{ pkgs, ... }: {\n")
         for row in rows:
             write_entry(file, str(row["version"]), row["url"], row["hash"])
+        file.write("}\n")
+
+
+def write_ftb_module(url: str, hash: str) -> None:
+    with open(f"../sources/ftb.nix", "w") as file:
+        print("Writing ftb.nix module")
+        file.write("{ pkgs, ... }: {\n")
+        write_entry(file, "server-installer", url, hash)
         file.write("}\n")

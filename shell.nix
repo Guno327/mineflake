@@ -10,10 +10,10 @@ in
     buildInputs = [
       (pkgs.python3.withPackages
         (p: [
-          p.jsondiff
           p.requests
-          p.tqdm
           p.beautifulsoup4
+          p.rich
+          p.mkdocs
         ]))
       pkgs.sqlite
     ];
