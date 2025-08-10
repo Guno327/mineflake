@@ -51,7 +51,6 @@ def handle_version(version: Dict, progress: Progress):
 
     # Existing Version
     else:
-        progress.console.log(f"Updating existing version {version["id"]}")
         # Should only ever be one row in rows
         row = dict(rows[0])
 
@@ -61,6 +60,7 @@ def handle_version(version: Dict, progress: Progress):
             return
 
         if new_url != row["url"] or new_asset_index != row["asset_index"]:
+            progress.console.log(f"Updating existing version {version["id"]}")
             new_hash = nix.hash_native(new_url, {})
 
             row["url"] = new_url
@@ -72,6 +72,9 @@ def handle_version(version: Dict, progress: Progress):
                 row,
             )
             connection.commit()
+        else:
+            progress.console.log(f"Version {version["id"]} is up to date")
+
         connection.close()
 
 

@@ -13,5 +13,5 @@ con.executescript(
 )
 con.close()
 
-# vanilla_fetch()
+vanilla_fetch()
 ftb_fetch()
