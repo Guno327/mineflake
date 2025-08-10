@@ -1,6 +1,12 @@
 site_name: Mineflake Docs
+site_url: https://mineflake.ghov.net
 nav:
   - About: index.md
   - Options: options.md
 
-theme: readthedocs
+theme: 
+  name: material
+  palette:
+    scheme: slate
+    primary: blue gray
+    accent: teal
