@@ -18,7 +18,7 @@ def handle_pack(pack: int, progress: Progress):
     manifest = json.loads(response.content)
 
     if "versions" not in manifest or "updated" not in manifest:
-        progress.console.log(f"ERR: Pack {manifest["name"]} is invalid")
+        progress.console.log(f"ERR: Pack {pack} manifest is invalid")
         connection.close()
         return
 
