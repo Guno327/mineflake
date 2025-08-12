@@ -8,7 +8,11 @@ from typing import TextIO
 
 def hash_native(url, headers):
     # Step 1: Fetch the content
-    response = requests.get(url, stream=True, headers=headers)
+    try:
+        response = requests.get(url, stream=True, headers=headers)
+    except:
+        return None
+
     if response.status_code != 200:
         return None
 

@@ -62,11 +62,12 @@ def handle_pack(pack: Dict, progress: Progress):
             or "isServerPack" not in file
             or "serverPackFileId" not in file
         ):
-            progress.console.log(f"Invalid file")
+            progress.console.log(f"Invalid file {file["id"]}")
             progress.update(file_task, advance=1)
             continue
 
         if not file["isAvailable"]:
+            progress.console.log(f"File is not available {file["id"]}")
             progress.update(file_task, advance=1)
             continue
 
@@ -75,6 +76,15 @@ def handle_pack(pack: Dict, progress: Progress):
             response = requests.get(server_url, headers=headers)
             new_file = json.loads(response.content)["data"]
             file = new_file
+
+        if (
+            "id" not in file
+            or "downloadUrl" not in file
+            or "fileFingerprint" not in file
+        ):
+            progress.console.log(f"Invalid file {file["id"]}")
+            progress.update(file_task, advance=1)
+            continue
 
         result = cursor.execute(
             "SELECT * FROM curseforge WHERE id=:id AND version=:version",
@@ -137,11 +147,13 @@ def curseforge_fetch():
         table_task = progress.add_task("Updating curseforge db table...", total=10000)
         session = requests.Session()
         for i in range(0, 9951, 50):
+            page_task = progress.add_task("Updating next 50 packs...", total=50)
             packs_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&sortField=6&sortOrder=desc&index={i}"
             response = session.get(packs_url, headers=headers)
             manifest_json = json.loads(response.content)
             packs = manifest_json["data"]
             for pack in packs:
                 handle_pack(pack, progress)
-                progress.update(table_task, advance=1)
+                progress.update(page_task, advance=1)
+            progress.remove_task(page_task)
             progress.update(table_task, completed=i + 50)
