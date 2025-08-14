@@ -2,10 +2,11 @@ import requests
 import json
 import sqlite3
 import bs4
-from rich.progress import Progress
 import nix
+import term
+import curseforge
+from rich.progress import Progress
 from typing import Dict
-from curseforge import headers as cf_heads
 
 
 def handle_pack(pack: int, progress: Progress):
@@ -163,23 +164,23 @@ def handle_pack(pack: int, progress: Progress):
                 filemap_valid = False
                 break
 
-            if file["path"] not in filemap:
-                filemap[file["path"]] = list()
-            filemap[file["path"]].append(file["name"])
-
-            is_curseforge = False
             if "url" not in file or file["url"] == "":
                 if "curseforge" in file:
-                    is_curseforge = True
                     curseforge = file["curseforge"]
-                    new_url = f"https://api.curseforge.com/v1/mods/{curseforge["project"]}/files/{curseforge["file"]}"
-                    file["url"] = new_url
+                    download_url = f"https://api.curseforge.com/v1/mods/{curseforge["project"]}/files/{curseforge["file"]}/download-url"
+                    response = requests.get(download_url, headers=curseforge.headers)
+                    download_data = json.loads(response.content)["data"]
+                    file["url"] = download_data
                 else:
                     progress.console.log(
                         f"ERR: invalid file (no url or curseforge) {file}"
                     )
                     filemap_valid = False
                     break
+
+            if file["path"] not in filemap:
+                filemap[file["path"]] = list()
+            filemap[file["path"]].append(file["url"])
 
             cur_file = cursor.execute("SELECT * FROM files WHERE url=:url", file)
             file_rows = cur_file.fetchall()
@@ -190,9 +191,7 @@ def handle_pack(pack: int, progress: Progress):
                 file_row["name"] = file["name"]
                 file_row["url"] = file["url"]
                 file_row["asset_index"] = file["sha1"]
-                file_row["hash"] = nix.hash_native(
-                    file_row["url"], {} if not is_curseforge else cf_heads
-                )
+                file_row["hash"] = nix.hash_native(file_row["url"], {})
                 if file_row["hash"] is None:
                     progress.console.log("ERR: File has invalid URL")
                     filemap_valid = False
@@ -208,9 +207,7 @@ def handle_pack(pack: int, progress: Progress):
                 if file_row["asset_index"] != file["sha1"]:
                     progress.console.log(f"Updating existing file {file["name"]}")
                     file_row["url"] = file["url"]
-                    file_row["hash"] = nix.hash_native(
-                        file_row["url"], {} if not is_curseforge else cf_heads
-                    )
+                    file_row["hash"] = nix.hash_native(file_row["url"], {})
                     if file_row["hash"] is None:
                         progress.console.log("ERR: File has invalid URL")
                         filemap_valid = False
@@ -253,13 +250,12 @@ def ftb_fetch():
     packs = manifest["packs"]
 
     with Progress() as progress:
-        progress.console.record = True
         pack_task = progress.add_task("Updating ftb table in db...", total=len(packs))
         for pack in packs:
+            if term.requested:
+                break
             # Skip vanilla
             if pack == 81:
                 continue
             handle_pack(pack, progress)
             progress.update(pack_task, advance=1)
-
-        progress.console.save_text("logs/ftb.log")

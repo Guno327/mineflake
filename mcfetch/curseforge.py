@@ -2,8 +2,10 @@ import requests
 import sqlite3
 import json
 import nix
+import term
 from rich.progress import Progress
 from typing import Dict
+
 
 headers: Dict
 api_key: str
@@ -145,13 +147,19 @@ def curseforge_fetch():
         table_task = progress.add_task("Updating curseforge db table...", total=10000)
         session = requests.Session()
         for i in range(0, 9951, 50):
+            if term.requested:
+                break
+
             page_task = progress.add_task("Updating next 50 packs...", total=50)
             packs_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&sortField=6&sortOrder=desc&index={i}"
             response = session.get(packs_url, headers=headers)
             manifest_json = json.loads(response.content)
             packs = manifest_json["data"]
             for pack in packs:
+                if term.requested:
+                    break
                 handle_pack(pack, progress)
                 progress.update(page_task, advance=1)
+
             progress.remove_task(page_task)
             progress.update(table_task, completed=i + 50)

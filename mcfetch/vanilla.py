@@ -2,9 +2,10 @@ import urllib.request as rq
 import requests
 import json
 import sqlite3
+import nix
+import term
 from rich.progress import Progress
 from typing import Dict
-import nix
 
 
 def fetch_jar(url: str) -> tuple[str, str] | tuple[None, None]:
@@ -94,6 +95,9 @@ def vanilla_fetch():
             )
 
             for version in versions:
+                if term.requested:
+                    break
+
                 handle_version(version, progress)
                 progress.update(version_task, advance=1)
 
