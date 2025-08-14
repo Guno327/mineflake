@@ -62,12 +62,10 @@ def handle_pack(pack: Dict, progress: Progress):
             or "isServerPack" not in file
             or "serverPackFileId" not in file
         ):
-            progress.console.log(f"Invalid file {file["id"]}")
             progress.update(file_task, advance=1)
             continue
 
         if not file["isAvailable"]:
-            progress.console.log(f"File is not available {file["id"]}")
             progress.update(file_task, advance=1)
             continue
 

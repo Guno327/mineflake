@@ -2,6 +2,7 @@ import subprocess as sub
 import sqlite3
 import requests
 import os
+from rich.progress import Progress
 from hashlib import sha256
 from typing import TextIO
 
@@ -71,21 +72,100 @@ def write_entry(file: TextIO, version: str, url: str, hash: str) -> None:
 def write_vanilla_module() -> None:
     connection = sqlite3.Connection("mineflake.db")
     connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
 
     with open(f"../sources/vanilla.nix", "w") as file:
-        res = connection.execute("SELECT * FROM vanilla")
+        res = cursor.execute("SELECT * FROM vanilla")
         rows = res.fetchall()
 
-        print(f"Writing {len(rows)} results to module vanilla.nix")
-        file.write("{ pkgs, ... }: {\n")
-        for row in rows:
-            write_entry(file, str(row["version"]), row["url"], row["hash"])
-        file.write("}\n")
+        with Progress() as progress:
+            write_task = progress.add_task(
+                "Writing vanilla packs to module...", total=len(rows)
+            )
+            file.write("{ pkgs, ... }: {\n")
+            for row in rows:
+                write_entry(file, str(row["version"]), row["url"], row["hash"])
+                progress.update(write_task, advance=1)
+            file.write("}\n")
 
 
-def write_ftb_module(url: str, hash: str) -> None:
-    with open(f"../sources/ftb.nix", "w") as file:
-        print("Writing ftb.nix module")
-        file.write("{ pkgs, ... }: {\n")
-        write_entry(file, "server-installer", url, hash)
-        file.write("}\n")
+def write_curseforge_module() -> None:
+    connection = sqlite3.Connection("mineflake.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    with open(f"../sources/curseforge.nix", "w") as file:
+        res = cursor.execute("SELECT * FROM curseforge")
+        rows = res.fetchall()
+
+        with Progress() as progress:
+            write_task = progress.add_task(
+                "Writing curseforge packs to module...", total=len(rows)
+            )
+            file.write("{ pkgs, ... }: {\n")
+            for row in rows:
+                id = row["id"] + ":" + row["version"]
+                write_entry(file, id, row["url"], row["hash"])
+                progress.update(write_task, advance=1)
+            file.write("}\n")
+
+
+def write_ftb_module() -> None:
+    connection = sqlite3.Connection("mineflake.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    with open(f"../sources/curseforge.nix", "w") as file:
+        res = cursor.execute("SELECT * FROM curseforge")
+        rows = res.fetchall()
+
+        with Progress() as progress:
+            write_task = progress.add_task(
+                "Writing ftb packs to module...", total=len(rows)
+            )
+
+            file.write("{ pkgs, ... }: let\n")
+            file.write("files = import ./files.nix\n")
+            file.write("loaders = import ./loaders.nix\n")
+            file.write("in {\n")
+
+            for row in rows:
+                id = row["id"] + ":" + row["version"]
+                file.write(f'"{id}"')
+                file.write(" = {\n")
+
+                file.write("filemap = {\n")
+                for dir in row["file_map"]:
+                    file.write(f"{dir} = [\n")
+                    for file in row["file_map"][dir]:
+                        file.write(f'files."{file}"\n')
+                    file.write("];\n")
+                file.write("};\n")
+
+                file.write(
+                    f'modloader = loaders."{row["modloader"]}:{row["modloader_version"]}";\n'
+                )
+                file.write("};\n\n")
+                progress.update(write_task, advance=1)
+            file.write("}\n")
+
+
+def write_files_module() -> None:
+    connection = sqlite3.Connection("mineflake.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    with open(f"../sources/curseforge.nix", "w") as file:
+        res = cursor.execute("SELECT * FROM files")
+        rows = res.fetchall()
+
+        with Progress() as progress:
+            write_task = progress.add_task(
+                "Writing files to module...", total=len(rows)
+            )
+
+            file.write("{ pkgs, ... }: {\n")
+            for row in rows:
+                write_entry(file, row["url"], row["url"], row["hash"])
+                progress.update(write_task, advance=1)
+            file.write("}\n")
