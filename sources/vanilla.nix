@@ -1,32 +1,12 @@
 { pkgs, ... }: {
-"25w31a" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/b966ccab7666a9f0c8c955f022bda8c778830b99/server.jar";
-sha256 = "1lx6ijc56z3zlqg489q2mivc3hvgbj56pvnz7vfymlsdf5ps4isw";
-};
-
 "25w15a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/fed01fcdf4d2f37b3f847e08fd099714766533c3/server.jar";
 sha256 = "0q1jpfa3d2msa0qzs73540rrg2759mwj6vcrabm66fcnm0ym8n8k";
 };
 
-"1.21.6" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/6e64dcabba3c01a7271b4fa6bd898483b794c59b/server.jar";
-sha256 = "0wci3p4wc13adki6k4iqjiwqb0k42scqmba44619xywaqj2g7aq8";
-};
-
-"1.21.8" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar";
-sha256 = "1rxvgyz969yhc1a0fnwmwwap1c548vpr0a39wx02rgnly2ldjj93";
-};
-
 "25w18a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/e69d69f1817f6c52f6ad2ca73ee1ef8a6903e560/server.jar";
 sha256 = "0xi6a3l5v8fkcva2hz1b20jm7bpfsfs2flajmdwg9g7nqifa10j2";
-};
-
-"1.21.7-rc2" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/273c8ffdb3d05f4575376b43d8175716cab1a39f/server.jar";
-sha256 = "03pwxr5igs27wxg9wnq3nvwdnzyr4fvlbqgv7xmvk3kn4xk7alwc";
 };
 
 "1.21.6-pre1" = pkgs.fetchurl {
@@ -49,31 +29,6 @@ url = "https://piston-data.mojang.com/v1/objects/575756f90e54e5c2cd78997dd9e3579
 sha256 = "1208nv4mb7srw64dxfyxspsiz8spnp414dswlz28617vrsm1pzxk";
 };
 
-"1.21.6-pre4" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/650e7d088d8b243a9159641cef75303587ba36bd/server.jar";
-sha256 = "0yv5fwpfpbhy28l5s6wvrfqpiwvrppv6jkpjbf1h35bzm672hk0f";
-};
-
-"1.21.7" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/05e4b48fbc01f0385adb74bcff9751d34552486c/server.jar";
-sha256 = "1vn4a0rqglyc37hrx6b8gbwym3im854ifwll2wkc6741bpvvhmdr";
-};
-
-"1.21.8-rc1" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/592535d9bcdb38db40da2d0033ce8494d1ef50d9/server.jar";
-sha256 = "0s9zij9qz9qladq9z9zgyxd3f4nkn0w0jxm96mcfdxnjy32931va";
-};
-
-"1.21.7-rc1" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/72716f71dfbc3d026a8577854ebaa69c63eb4474/server.jar";
-sha256 = "1cf6m0nsg366mpvxqkkrklk6jv1r5b2sfwxqrssz3gv1k8jhnnyw";
-};
-
-"1.21.6-rc1" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/2794c776ee51c3f3bd6b111ecfe5926b4f49df19/server.jar";
-sha256 = "1ky7an8l8603cv4nakr259w6m3jhlc15j40wyq0wz0gxyf2swpj6";
-};
-
 "25w16a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/3d8223843a659d8ebc33459864ba02b34485ea11/server.jar";
 sha256 = "15x7ws6hvk97rx0aigrzkmh1wmxgh8jff9qlbrmyy3gzd4kqd5ac";
@@ -89,19 +44,9 @@ url = "https://piston-data.mojang.com/v1/objects/cd279a0a79fd62f41c9dd8d17d455d0
 sha256 = "1dl861zczb8a5qlbl9kzpkd3dl22fwjp16gijhn0mg1wyahbjl45";
 };
 
-"25w32a" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/c98a125ca315cac45bee91a7ecbc4920007ac5ff/server.jar";
-sha256 = "1wvhnq49c94z6k1rmf5pxs6xsq0jy4xjahbf3m3ydrgf0jz9bcac";
-};
-
 "25w21a" = pkgs.fetchurl {
 url = "https://piston-data.mojang.com/v1/objects/a5f7be5d2f05250abfc49639a26f399b8a8ebb61/server.jar";
 sha256 = "1mf665nlxafx2sqizz56p1510zn40z32knkr0k82ylxhrsf7sd0w";
-};
-
-"1.21.6-pre3" = pkgs.fetchurl {
-url = "https://piston-data.mojang.com/v1/objects/03f53214df599b9e39a560b94d0df5636858c32f/server.jar";
-sha256 = "1wqcclqwwm9gmmyqwbz3wjl0kc6bd253kla26z1bipzfy3mcnk1y";
 };
 
 "25w10a" = pkgs.fetchurl {
@@ -3802,6 +3747,66 @@ sha256 = "0ldb5pvyriwy14x2kifmjwlbn9nmgcaxzp26ywiic7zrhi7qsdgf";
 "1.2.5" = pkgs.fetchurl {
 url = "https://launcher.mojang.com/v1/objects/d8321edc9470e56b8ad5c67bbd16beba25843336/server.jar";
 sha256 = "1lc254znq77wa7rfm8zmjwx2f3wllj00sksql3sl1rxf2rymsa0r";
+};
+
+"25w33a" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/83027f72aa7957837aeeaef499c67105583d0928/server.jar";
+sha256 = "1pbmh4ksxcn7fw50y6dmain12ap9jq1zh4bydm3w5g9wymfxnjv6";
+};
+
+"25w32a" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/c98a125ca315cac45bee91a7ecbc4920007ac5ff/server.jar";
+sha256 = "1wvhnq49c94z6k1rmf5pxs6xsq0jy4xjahbf3m3ydrgf0jz9bcac";
+};
+
+"25w31a" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/b966ccab7666a9f0c8c955f022bda8c778830b99/server.jar";
+sha256 = "1lx6ijc56z3zlqg489q2mivc3hvgbj56pvnz7vfymlsdf5ps4isw";
+};
+
+"1.21.8" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar";
+sha256 = "1rxvgyz969yhc1a0fnwmwwap1c548vpr0a39wx02rgnly2ldjj93";
+};
+
+"1.21.8-rc1" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/592535d9bcdb38db40da2d0033ce8494d1ef50d9/server.jar";
+sha256 = "0s9zij9qz9qladq9z9zgyxd3f4nkn0w0jxm96mcfdxnjy32931va";
+};
+
+"1.21.7" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/05e4b48fbc01f0385adb74bcff9751d34552486c/server.jar";
+sha256 = "1vn4a0rqglyc37hrx6b8gbwym3im854ifwll2wkc6741bpvvhmdr";
+};
+
+"1.21.7-rc2" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/273c8ffdb3d05f4575376b43d8175716cab1a39f/server.jar";
+sha256 = "03pwxr5igs27wxg9wnq3nvwdnzyr4fvlbqgv7xmvk3kn4xk7alwc";
+};
+
+"1.21.7-rc1" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/72716f71dfbc3d026a8577854ebaa69c63eb4474/server.jar";
+sha256 = "1cf6m0nsg366mpvxqkkrklk6jv1r5b2sfwxqrssz3gv1k8jhnnyw";
+};
+
+"1.21.6" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/6e64dcabba3c01a7271b4fa6bd898483b794c59b/server.jar";
+sha256 = "0wci3p4wc13adki6k4iqjiwqb0k42scqmba44619xywaqj2g7aq8";
+};
+
+"1.21.6-rc1" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/2794c776ee51c3f3bd6b111ecfe5926b4f49df19/server.jar";
+sha256 = "1ky7an8l8603cv4nakr259w6m3jhlc15j40wyq0wz0gxyf2swpj6";
+};
+
+"1.21.6-pre4" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/650e7d088d8b243a9159641cef75303587ba36bd/server.jar";
+sha256 = "0yv5fwpfpbhy28l5s6wvrfqpiwvrppv6jkpjbf1h35bzm672hk0f";
+};
+
+"1.21.6-pre3" = pkgs.fetchurl {
+url = "https://piston-data.mojang.com/v1/objects/03f53214df599b9e39a560b94d0df5636858c32f/server.jar";
+sha256 = "1wqcclqwwm9gmmyqwbz3wjl0kc6bd253kla26z1bipzfy3mcnk1y";
 };
 
 "latest" = pkgs.fetchurl {

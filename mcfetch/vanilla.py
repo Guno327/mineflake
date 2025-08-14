@@ -89,7 +89,6 @@ def vanilla_fetch():
         versions = manifest_json["versions"]
 
         with Progress() as progress:
-            progress.console.record = True
             version_task = progress.add_task(
                 "Updating vanilla table in db...", total=len(versions)
             )
@@ -120,8 +119,6 @@ def vanilla_fetch():
                     row,
                 )
                 connection.commit()
-
-            progress.console.save_text("logs/vanilla.log")
         connection.close()
 
     nix.write_vanilla_module()

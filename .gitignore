@@ -4,3 +4,8 @@ result-*
 
 # Ignore automatically generated direnv output
 .direnv
+
+# Ignore mcfetch side effects
+mcfetch/__pycache__/
+mcfetch/tmp
+mcfetch/log/
