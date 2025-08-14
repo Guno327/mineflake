@@ -40,21 +40,8 @@ with Progress() as progress:
         if match is None:
             progress.update(migrate_task, advance=1)
         else:
-            progress.console.log(f"Migrating {match[2]}")
-            old_url = row["url"]
-            download_url = f"https://api.curseforge.com/v1/mods/{match[1]}/files/{match[2]}/download-url"
-            response = requests.get(download_url, headers=curseforge.headers)
-            try:
-                download_data_url = json.loads(response.content)["data"]
-                row["url"] = download_data_url
-                row["hash"] = nix.hash_native(row["url"], {})
-                cursor.execute(
-                    "REPLACE INTO files VALUES(:name, :url, :asset_index, :hash)", row
-                )
-                connection.commit()
-                progress.update(migrate_task, advance=1)
-            except:
-                progress.console.log(f"Deleting invalid file {match[2]}")
-                cursor.execute("DELETE FROM files WHERE url=:url", {"url": old_url})
-                connection.commit()
+            progress.console.log(f"Deleting old file {match[2]}")
+            cursor.execute("DELETE FROM files WHERE url=:url", {"url": row["url"]})
+            connection.commit()
+            progress.update(migrate_task, advance=1)
     connection.close()
