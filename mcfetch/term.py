@@ -7,7 +7,8 @@ requested: bool = False
 def exit_handler(sig, frame):
     global requested
 
-    print("Wrapping up...")
+    if not requested:
+        print("Wrapping up...")
     requested = True
 
 

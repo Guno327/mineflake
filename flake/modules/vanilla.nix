@@ -11,7 +11,7 @@
     pname = "mineflake-server";
     version = "${cfg.version}";
 
-    jar = vanilla_sources.${cfg.version};
+    jar = pkgs.fetchurl (vanilla_sources.${cfg.version});
     buildInputs = [cfg.java];
     phases = ["installPhase"];
 

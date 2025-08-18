@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from vanilla import vanilla_fetch
 from ftb import ftb_fetch
 from curseforge import curseforge_fetch
@@ -26,4 +27,6 @@ if __name__ == "__main__":
         exit(1)
 
     curseforge_fetch()
-    exit(1)
+
+    if os.path.exists("tmp"):
+        os.remove("tmp")

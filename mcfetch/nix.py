@@ -62,7 +62,7 @@ def hash_nix(url):
 
 def write_entry(file: TextIO, version: str, url: str, hash: str) -> None:
     file.write(f'"{version}"')
-    file.write(" = pkgs.fetchurl {\n")
+    file.write(" = {\n")
     file.write(f'url = "{url}";\n')
     file.write(f'sha256 = "{hash}";\n')
     file.write("};\n\n")
@@ -74,7 +74,7 @@ def write_vanilla_module() -> None:
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
 
-    with open(f"../sources/vanilla.nix", "w") as file:
+    with open(f"../flake/sources/vanilla.nix", "w") as file:
         res = cursor.execute("SELECT * FROM vanilla")
         rows = res.fetchall()
 
@@ -82,8 +82,12 @@ def write_vanilla_module() -> None:
             write_task = progress.add_task(
                 "Writing vanilla packs to module...", total=len(rows)
             )
-            file.write("{ pkgs, ... }: {\n")
+            file.write("{ ... }: {\n")
             for row in rows:
+                if row["url"] is None:
+                    progress.update(write_task, advance=1)
+                    continue
+
                 write_entry(file, str(row["version"]), row["url"], row["hash"])
                 progress.update(write_task, advance=1)
             file.write("}\n")
@@ -94,7 +98,7 @@ def write_curseforge_module() -> None:
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
 
-    with open(f"../sources/curseforge.nix", "w") as file:
+    with open(f"../flake/sources/curseforge.nix", "w") as file:
         res = cursor.execute("SELECT * FROM curseforge")
         rows = res.fetchall()
 
@@ -102,7 +106,7 @@ def write_curseforge_module() -> None:
             write_task = progress.add_task(
                 "Writing curseforge packs to module...", total=len(rows)
             )
-            file.write("{ pkgs, ... }: {\n")
+            file.write("{ ... }: {\n")
             for row in rows:
                 id = row["id"] + ":" + row["version"]
                 write_entry(file, id, row["url"], row["hash"])
@@ -115,7 +119,7 @@ def write_ftb_module() -> None:
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
 
-    with open(f"../sources/curseforge.nix", "w") as file:
+    with open(f"../flake/sources/curseforge.nix", "w") as file:
         res = cursor.execute("SELECT * FROM curseforge")
         rows = res.fetchall()
 
@@ -155,7 +159,7 @@ def write_files_module() -> None:
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
 
-    with open(f"../sources/curseforge.nix", "w") as file:
+    with open(f"../flake/sources/curseforge.nix", "w") as file:
         res = cursor.execute("SELECT * FROM files")
         rows = res.fetchall()
 
@@ -164,7 +168,7 @@ def write_files_module() -> None:
                 "Writing files to module...", total=len(rows)
             )
 
-            file.write("{ pkgs, ... }: {\n")
+            file.write("{ ... }: {\n")
             for row in rows:
                 write_entry(file, row["url"], row["url"], row["hash"])
                 progress.update(write_task, advance=1)

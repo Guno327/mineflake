@@ -3,8 +3,12 @@ import sqlite3
 import json
 import nix
 import term
+import os
+from multiprocessing import Queue
 from rich.progress import Progress
 from typing import Dict
+from running import run_parallel
+from filecmp import cmp
 
 
 headers: Dict
@@ -17,7 +21,7 @@ headers = {
 }
 
 
-def handle_pack(pack: Dict, progress: Progress):
+def handle_pack(log: Queue, db: Queue, pack: Dict):
     global headers
     connection = sqlite3.Connection("mineflake.db")
     connection.row_factory = sqlite3.Row
@@ -31,44 +35,43 @@ def handle_pack(pack: Dict, progress: Progress):
     if len(rows) != 0:
         row = dict(rows[0])
         if row["asset_index"] == pack["dateModified"]:
-            progress.console.log(f"Pack {pack["slug"]} is up to date")
+            log.put(f"Pack {pack["slug"]} is up to date")
             connection.close()
             return
         row["asset_index"] = pack["dateModified"]
-        cursor.execute(
-            "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
-            row,
+        db.put(
+            (
+                "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                row,
+            )
         )
     else:
-        cursor.execute(
-            "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
-            {
-                "id": pack["slug"],
-                "version": "root",
-                "url": None,
-                "asset_index": pack["dateModified"],
-                "hash": None,
-            },
+        db.put(
+            (
+                "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                {
+                    "id": pack["slug"],
+                    "version": "root",
+                    "url": None,
+                    "asset_index": pack["dateModified"],
+                    "hash": None,
+                },
+            )
         )
 
     files_url = f"https://api.curseforge.com/v1/mods/{pack["id"]}/files"
     response = requests.get(files_url, headers=headers)
     files = json.loads(response.content)["data"]
 
-    file_task = progress.add_task(
-        f"Updating files for {pack["slug"]}", total=len(files)
-    )
     for file in files:
         if (
             "isAvailable" not in file
             or "isServerPack" not in file
             or "serverPackFileId" not in file
         ):
-            progress.update(file_task, advance=1)
             continue
 
         if not file["isAvailable"]:
-            progress.update(file_task, advance=1)
             continue
 
         if not file["isServerPack"]:
@@ -82,8 +85,7 @@ def handle_pack(pack: Dict, progress: Progress):
             or "downloadUrl" not in file
             or "fileFingerprint" not in file
         ):
-            progress.console.log(f"Invalid file {file["id"]}")
-            progress.update(file_task, advance=1)
+            log.put(f"Invalid file {file["id"]}")
             continue
 
         result = cursor.execute(
@@ -95,21 +97,22 @@ def handle_pack(pack: Dict, progress: Progress):
         if len(rows) != 0:
             row = dict(rows[0])
             if row["asset_index"] != file["fileFingerprint"]:
-                progress.console.log(f"Updating file {file["id"]}")
+                log.put(f"{pack["slug"]}: Updating file {file["id"]}")
                 row["url"] = file["downloadUrl"]
                 row["asset_index"] = file["fileFingerprint"]
                 row["hash"] = nix.hash_native(row["url"], {})
                 if not row["hash"]:
-                    progress.console.log(f"ERR: Could not hash file {file["id"]}")
-                    progress.update(file_task, advance=1)
+                    log.put(f"ERR: Could not hash file {file["id"]}")
                     continue
 
-                cursor.execute(
-                    "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
-                    row,
+                db.put(
+                    (
+                        "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                        row,
+                    )
                 )
         else:
-            progress.console.log(f"Adding new file {file["id"]}")
+            log.put(f"{pack["slug"]}: Adding new file {file["id"]}")
             row = dict()
             row["id"] = pack["slug"]
             row["version"] = file["id"]
@@ -117,18 +120,18 @@ def handle_pack(pack: Dict, progress: Progress):
             row["url"] = file["downloadUrl"]
             row["hash"] = nix.hash_native(row["url"], {})
             if not row["hash"]:
-                progress.console.log(f"ERR: Could not hash file {file["id"]}")
-                progress.update(file_task, advance=1)
+                log.put(f"ERR: Could not hash file {file["id"]}")
                 continue
 
-            cursor.execute(
-                "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
-                row,
+            db.put(
+                (
+                    "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                    row,
+                )
             )
-        progress.update(file_task, advance=1)
 
-    progress.remove_task(file_task)
-    connection.commit()
+    log.put(f"Finished updating pack {pack["slug"]}")
+    db.put("commit")
     connection.close()
 
 
@@ -143,23 +146,35 @@ def curseforge_fetch():
         "Accept": "application/json",
     }
 
+    all_packs = []
     with Progress() as progress:
-        table_task = progress.add_task("Updating curseforge db table...", total=10000)
         session = requests.Session()
+
+        fetch_task = progress.add_task("Fetching curseforge pack list", total=10000)
         for i in range(0, 9951, 50):
             if term.requested:
                 break
+            page: int = int(i / 50) + 1
+            progress.console.log(f"Fetching page {page}")
 
-            page_task = progress.add_task("Updating next 50 packs...", total=50)
             packs_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&sortField=6&sortOrder=desc&index={i}"
             response = session.get(packs_url, headers=headers)
             manifest_json = json.loads(response.content)
             packs = manifest_json["data"]
-            for pack in packs:
-                if term.requested:
-                    break
-                handle_pack(pack, progress)
-                progress.update(page_task, advance=1)
+            all_packs = all_packs + packs
+            progress.update(fetch_task, advance=50)
+        progress.remove_task(fetch_task)
 
-            progress.remove_task(page_task)
-            progress.update(table_task, completed=i + 50)
+    with open("cache/cf.json", "w") as file:
+        json.dump(sorted(all_packs, key=lambda d: d["id"]), file)
+
+    if os.path.exists("cache/cf_old.json") and cmp(
+        "cache/cf_old.json", "cache/cf.json"
+    ):
+        print("All curseforge packs are up to date")
+        os.remove("cache/cf.json")
+        return
+
+    run_parallel(handle_pack, all_packs, len(all_packs), "Updating curseforge db table")
+    if not term.requested:
+        os.replace("cache/cf.json", "cache/cf_old.json")
