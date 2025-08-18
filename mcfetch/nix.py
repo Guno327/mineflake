@@ -75,7 +75,7 @@ def write_vanilla_module() -> None:
     cursor = connection.cursor()
 
     with open(f"../flake/sources/vanilla.nix", "w") as file:
-        res = cursor.execute("SELECT * FROM vanilla")
+        res = cursor.execute("SELECT * FROM vanilla WHERE url IS NOT NULL")
         rows = res.fetchall()
 
         with Progress() as progress:
@@ -84,10 +84,6 @@ def write_vanilla_module() -> None:
             )
             file.write("{ ... }: {\n")
             for row in rows:
-                if row["url"] is None:
-                    progress.update(write_task, advance=1)
-                    continue
-
                 write_entry(file, str(row["version"]), row["url"], row["hash"])
                 progress.update(write_task, advance=1)
             file.write("}\n")
@@ -99,57 +95,18 @@ def write_curseforge_module() -> None:
     cursor = connection.cursor()
 
     with open(f"../flake/sources/curseforge.nix", "w") as file:
-        res = cursor.execute("SELECT * FROM curseforge")
+        res = cursor.execute("SELECT * FROM curseforge WHERE url IS NOT NULL")
         rows = res.fetchall()
 
         with Progress() as progress:
+            progress.console.log(f"Found {len(rows)} curseforge packs")
             write_task = progress.add_task(
-                "Writing curseforge packs to module...", total=len(rows)
+                "Writing curseforge packs to module", total=len(rows)
             )
             file.write("{ ... }: {\n")
             for row in rows:
-                id = row["id"] + ":" + row["version"]
+                id = f"{row["id"]}:{row["version"]}"
                 write_entry(file, id, row["url"], row["hash"])
-                progress.update(write_task, advance=1)
-            file.write("}\n")
-
-
-def write_ftb_module() -> None:
-    connection = sqlite3.Connection("mineflake.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
-
-    with open(f"../flake/sources/curseforge.nix", "w") as file:
-        res = cursor.execute("SELECT * FROM curseforge")
-        rows = res.fetchall()
-
-        with Progress() as progress:
-            write_task = progress.add_task(
-                "Writing ftb packs to module...", total=len(rows)
-            )
-
-            file.write("{ pkgs, ... }: let\n")
-            file.write("files = import ./files.nix\n")
-            file.write("loaders = import ./loaders.nix\n")
-            file.write("in {\n")
-
-            for row in rows:
-                id = row["id"] + ":" + row["version"]
-                file.write(f'"{id}"')
-                file.write(" = {\n")
-
-                file.write("filemap = {\n")
-                for dir in row["file_map"]:
-                    file.write(f"{dir} = [\n")
-                    for file in row["file_map"][dir]:
-                        file.write(f'files."{file}"\n')
-                    file.write("];\n")
-                file.write("};\n")
-
-                file.write(
-                    f'modloader = loaders."{row["modloader"]}:{row["modloader_version"]}";\n'
-                )
-                file.write("};\n\n")
                 progress.update(write_task, advance=1)
             file.write("}\n")
 
@@ -171,5 +128,45 @@ def write_files_module() -> None:
             file.write("{ ... }: {\n")
             for row in rows:
                 write_entry(file, row["url"], row["url"], row["hash"])
+                progress.update(write_task, advance=1)
+            file.write("}\n")
+
+
+def write_ftb_module() -> None:
+    connection = sqlite3.Connection("mineflake.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    with open(f"../flake/sources/curseforge.nix", "w") as file:
+        res = cursor.execute("SELECT * FROM ftb WHERE filemap IS NOT NULL")
+        rows = res.fetchall()
+
+        with Progress() as progress:
+            write_task = progress.add_task(
+                "Writing ftb packs to module...", total=len(rows)
+            )
+
+            file.write("{ pkgs, ... }: let\n")
+            file.write("files = import ./files.nix\n")
+            file.write("loaders = import ./loaders.nix\n")
+            file.write("in {\n")
+
+            for row in rows:
+                id = f"{row["id"]}:{row["version"]}"
+                file.write(f'"{id}"')
+                file.write(" = {\n")
+
+                file.write("filemap = {\n")
+                for dir in row["file_map"]:
+                    file.write(f"{dir} = [\n")
+                    for file in row["file_map"][dir]:
+                        file.write(f'files."{file}"\n')
+                    file.write("];\n")
+                file.write("};\n")
+
+                file.write(
+                    f'modloader = loaders."{row["modloader"]}:{row["modloader_version"]}";\n'
+                )
+                file.write("};\n\n")
                 progress.update(write_task, advance=1)
             file.write("}\n")

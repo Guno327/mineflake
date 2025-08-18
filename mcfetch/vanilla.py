@@ -29,6 +29,10 @@ def handle_version(log: Queue, db: Queue, version: Dict):
     cursor = connection.cursor()
 
     if "id" not in version:
+        connection.close()
+        return
+    if version["type"] != "release":
+        connection.close()
         return
 
     result = cursor.execute("SELECT * from vanilla WHERE version=:id", version)

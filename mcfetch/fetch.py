@@ -20,13 +20,15 @@ if __name__ == "__main__":
 
     vanilla_fetch()
     if term.requested:
-        exit(1)
-
-    ftb_fetch()
-    if term.requested:
+        if os.path.exists("tmp"):
+            os.remove("tmp")
         exit(1)
 
     curseforge_fetch()
+    if term.requested:
+        if os.path.exists("tmp"):
+            os.remove("tmp")
+        exit(1)
 
     if os.path.exists("tmp"):
         os.remove("tmp")

@@ -136,8 +136,6 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
 
 
 def curseforge_fetch():
-    global headers
-
     api_key: str
     with open("/home/gunnar/.nixcfg/secrets/cf-api.key") as key_file:
         api_key = key_file.read().replace("\n", "")
@@ -178,3 +176,4 @@ def curseforge_fetch():
     run_parallel(handle_pack, all_packs, len(all_packs), "Updating curseforge db table")
     if not term.requested:
         os.replace("cache/cf.json", "cache/cf_old.json")
+        nix.write_curseforge_module()

@@ -8,8 +8,7 @@ with lib; {
 
   version = mkOption {
     type = types.str;
-    default = "latest";
-    description = "Server version";
+    description = "Server version, exact value depends on type of server";
   };
 
   dir = mkOption {
