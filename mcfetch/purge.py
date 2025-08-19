@@ -10,44 +10,48 @@ from typing import Dict
 
 
 def handle_ftb_pack(log: Queue, db: Queue, row: Dict):
-    if row["version"] == "root":
-        return
-    manifest_url = (
-        f"https://api.modpacks.ch/public/modpack/{row["id"]}/{row["version"]}"
-    )
-    response = requests.get(manifest_url)
-    release = json.loads(response.content)["type"]
-    if release != "release":
-        log.put(f"Removing {row["id"]}:{row["version"]}")
-        db.put(
-            (
-                "DELETE FROM ftb WHERE id=:id AND version=:version",
-                {"id": row["id"], "version": row["version"]},
-            )
+    try:
+        if row["version"] == "root":
+            return
+        manifest_url = (
+            f"https://api.modpacks.ch/public/modpack/{row["id"]}/{row["version"]}"
         )
-        db.put("commit")
-
-
-def handle_cf_pack(log: Queue, db: Queue, pack: Dict):
-    result = cur.execute(
-        "SELECT * FROM curseforge WHERE id=:slug AND url IS NOT NULL", pack
-    )
-    rows = result.fetchall()
-    for row in rows:
-        file_url = (
-            f"https://api.curseforge.com/v1/mods/{pack["id"]}/files/{row["version"]}"
-        )
-        response = requests.get(file_url, headers=curseforge.headers)
-        release = json.loads(response.content)["data"]["releaseType"]
-        if release != 1:
+        response = requests.get(manifest_url)
+        release = json.loads(response.content)["type"]
+        if release != "release":
             log.put(f"Removing {row["id"]}:{row["version"]}")
             db.put(
                 (
-                    "DELETE FROM curseforge WHERE id=:id AND version=:version",
+                    "DELETE FROM ftb WHERE id=:id AND version=:version",
                     {"id": row["id"], "version": row["version"]},
                 )
             )
             db.put("commit")
+    except:
+        return
+
+
+def handle_cf_pack(log: Queue, db: Queue, pack: Dict):
+    try:
+        result = cur.execute(
+            "SELECT * FROM curseforge WHERE id=:slug AND url IS NOT NULL", pack
+        )
+        rows = result.fetchall()
+        for row in rows:
+            file_url = f"https://api.curseforge.com/v1/mods/{pack["id"]}/files/{row["version"]}"
+            response = requests.get(file_url, headers=curseforge.headers)
+            release = json.loads(response.content)["data"]["releaseType"]
+            if release != 1:
+                log.put(f"Removing {row["id"]}:{row["version"]}")
+                db.put(
+                    (
+                        "DELETE FROM curseforge WHERE id=:id AND version=:version",
+                        {"id": row["id"], "version": row["version"]},
+                    )
+                )
+                db.put("commit")
+    except:
+        return
 
 
 conn = sqlite3.Connection("mineflake.db")
