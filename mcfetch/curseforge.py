@@ -64,6 +64,10 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
     files = json.loads(response.content)["data"]
 
     for file in files:
+        # Make sure is release version
+        if "releaseType" not in file or file["releaseType"] != 1:
+            continue
+
         if (
             "isAvailable" not in file
             or "isServerPack" not in file

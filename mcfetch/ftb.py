@@ -36,6 +36,11 @@ def handle_pack(log: Queue, db: Queue, pack: int):
         connection.close()
         return
 
+    # Make sure release
+    if manifest["type"] != "release":
+        log.put(f"Pack {pack} is beta/alpha")
+        return
+
     # See if pack has been updated, DO NOT COMMIT
     result = cursor.execute(
         "SELECT * FROM ftb WHERE id=:id AND version='root'", {"id": pack}
@@ -66,6 +71,10 @@ def handle_pack(log: Queue, db: Queue, pack: int):
     # Update versions
     versions = manifest["versions"]
     for version in versions:
+        # Make sure is release version
+        if "type" not in version or version["type"] != "release":
+            continue
+
         # Check if version has been updated
         result = cursor.execute(
             "SELECT * FROM ftb WHERE id=:id AND version=:version",
