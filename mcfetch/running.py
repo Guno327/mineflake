@@ -4,7 +4,7 @@ import sqlite3
 from functools import partial
 from rich.progress import Progress
 from multiprocessing import Pool, Queue, Manager
-from typing import Callable, Iterable, TypeVar, Tuple
+from typing import Callable, List, TypeVar, Tuple
 
 
 def progress_drain(progress: Progress, logs: Queue):
@@ -41,13 +41,12 @@ T = TypeVar("T")
 
 def run_parallel(
     func: Callable[[Queue, Queue, T], None],
-    args: Iterable[T],
-    args_size: int,
+    args: List[T],
     msg: str,
 ):
     with Progress() as progress:
         with Manager() as manager:
-            task = progress.add_task(msg, total=args_size)
+            task = progress.add_task(msg, total=len(args))
             logs: Queue = manager.Queue()  # pyright: ignore
             db: Queue = manager.Queue()  # pyright: ignore
             work = partial(func, logs, db)
