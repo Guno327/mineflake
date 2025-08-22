@@ -321,9 +321,10 @@ def ftb_fetch():
     # Remove Vanilla
     if 81 in packs:
         packs.remove(81)
+    packs = list(packs)
 
     # Main Work
-    run_parallel(handle_pack, packs, len(packs), "Updating ftb table in db")
+    run_parallel(handle_pack, packs, "Updating ftb table in db")
 
     if not term.requested:
         os.replace("cache/ftb.json", "cache/ftb_old.json")

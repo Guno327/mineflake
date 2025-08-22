@@ -134,9 +134,7 @@ def vanilla_fetch():
     versions = manifest["versions"]
 
     # Main work
-    run_parallel(
-        handle_version, versions, len(versions), "Updating vanilla table in db"
-    )
+    run_parallel(handle_version, versions, "Updating vanilla table in db")
 
     # Update/Insert Latest
     if not term.requested:

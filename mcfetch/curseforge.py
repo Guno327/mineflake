@@ -9,6 +9,7 @@ from rich.progress import Progress
 from typing import Dict
 from running import run_parallel
 from filecmp import cmp
+from util import find_script
 
 
 headers: Dict
@@ -29,7 +30,7 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
 
     result = cursor.execute(
         "SELECT * FROM curseforge WHERE id=:id AND version=:version",
-        {"id": pack["slug"], "version": "root"},
+        {"id": pack["id"], "version": "root"},
     )
     rows = result.fetchall()
     if len(rows) != 0:
@@ -41,18 +42,20 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
         row["asset_index"] = pack["dateModified"]
         db.put(
             (
-                "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                "REPLACE INTO curseforge VALUES(:id, :slug, :version, :url, :script, :asset_index, :hash)",
                 row,
             )
         )
     else:
         db.put(
             (
-                "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                "INSERT INTO curseforge VALUES(:id, :slug, :version, :url, :script, :asset_index, :hash)",
                 {
-                    "id": pack["slug"],
+                    "id": pack["id"],
                     "version": "root",
+                    "slug": pack["slug"],
                     "url": None,
+                    "script": None,
                     "asset_index": pack["dateModified"],
                     "hash": None,
                 },
@@ -94,7 +97,7 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
 
         result = cursor.execute(
             "SELECT * FROM curseforge WHERE id=:id AND version=:version",
-            {"id": pack["slug"], "version": file["id"]},
+            {"id": pack["id"], "version": file["id"]},
         )
         rows = result.fetchall()
 
@@ -109,16 +112,23 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
                     log.put(f"ERR: Could not hash file {file["id"]}")
                     continue
 
+                row["script"] = find_script(row["url"])
+                if not row["script"]:
+                    row["url"] = None
+                    row["hash"] = None
+                    row["asset_index"] = "Could not find start script"
+
                 db.put(
                     (
-                        "REPLACE INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                        "REPLACE INTO curseforge VALUES(:id, :slug, :version, :url, :script, :asset_index, :hash)",
                         row,
                     )
                 )
         else:
             log.put(f"{pack["slug"]}: Adding new file {file["id"]}")
             row = dict()
-            row["id"] = pack["slug"]
+            row["id"] = pack["id"]
+            row["slug"] = pack["slug"]
             row["version"] = file["id"]
             row["asset_index"] = file["fileFingerprint"]
             row["url"] = file["downloadUrl"]
@@ -127,9 +137,15 @@ def handle_pack(log: Queue, db: Queue, pack: Dict):
                 log.put(f"ERR: Could not hash file {file["id"]}")
                 continue
 
+            row["script"] = find_script(row["url"])
+            if not row["script"]:
+                row["url"] = None
+                row["hash"] = None
+                row["asset_index"] = "Could not find start script"
+
             db.put(
                 (
-                    "INSERT INTO curseforge VALUES(:id, :version, :url, :asset_index, :hash)",
+                    "INSERT INTO curseforge VALUES(:id, :slug, :version, :url, :script, :asset_index, :hash)",
                     row,
                 )
             )
@@ -177,7 +193,7 @@ def curseforge_fetch():
         os.remove("cache/cf.json")
         return
 
-    run_parallel(handle_pack, all_packs, len(all_packs), "Updating curseforge db table")
+    run_parallel(handle_pack, all_packs, "Updating curseforge db table")
     if not term.requested:
         os.replace("cache/cf.json", "cache/cf_old.json")
         nix.write_curseforge_module()

@@ -8,49 +8,48 @@ from typing import TextIO
 
 
 def hash_native(url, headers):
-    # Step 1: Fetch the content
     try:
+        # Step 1: Fetch the content
         response = requests.get(url, stream=True, headers=headers)
+        if response.status_code != 200:
+            return None
+
+        with open("tmp", "wb") as file:
+            file.write(response.content)
+
+        # Step 2: Compute SHA256 hash (raw bytes)
+        h = sha256()
+        for chunk in response.iter_content(chunk_size=8192):
+            h.update(chunk)
+        digest = h.digest()  # 32-byte digest
+
+        # Step 3: Reverse the bytes (Nix uses little-endian byte order)
+        reversed_digest = digest[::-1]
+
+        # Step 4: Nix base32 alphabet
+        nix_b32_alphabet = "0123456789abcdfghijklmnpqrsvwxyz"
+
+        # Convert bytes to big-endian integer, then to base32 using the custom alphabet
+        # Pad to 160 bits (20 bytes) multiple? No — just encode the full 32 bytes
+        num = int.from_bytes(reversed_digest, byteorder="big")
+        if num == 0:
+            return nix_b32_alphabet[0]
+
+        encoded = ""
+        while num:
+            num, rem = divmod(num, 32)
+            encoded = nix_b32_alphabet[rem] + encoded
+
+        if len(encoded) > 52:
+            os.error("INVALID HASH")
+            exit(0)
+
+        if len(encoded) != 52:
+            encoded = "0" * (52 - len(encoded)) + encoded
+
+        return encoded
     except:
         return None
-
-    if response.status_code != 200:
-        return None
-
-    with open("tmp", "wb") as file:
-        file.write(response.content)
-
-    # Step 2: Compute SHA256 hash (raw bytes)
-    h = sha256()
-    for chunk in response.iter_content(chunk_size=8192):
-        h.update(chunk)
-    digest = h.digest()  # 32-byte digest
-
-    # Step 3: Reverse the bytes (Nix uses little-endian byte order)
-    reversed_digest = digest[::-1]
-
-    # Step 4: Nix base32 alphabet
-    nix_b32_alphabet = "0123456789abcdfghijklmnpqrsvwxyz"
-
-    # Convert bytes to big-endian integer, then to base32 using the custom alphabet
-    # Pad to 160 bits (20 bytes) multiple? No — just encode the full 32 bytes
-    num = int.from_bytes(reversed_digest, byteorder="big")
-    if num == 0:
-        return nix_b32_alphabet[0]
-
-    encoded = ""
-    while num:
-        num, rem = divmod(num, 32)
-        encoded = nix_b32_alphabet[rem] + encoded
-
-    if len(encoded) > 52:
-        os.error("INVALID HASH")
-        exit(0)
-
-    if len(encoded) != 52:
-        encoded = "0" * (52 - len(encoded)) + encoded
-
-    return encoded
 
 
 def hash_nix(url):
