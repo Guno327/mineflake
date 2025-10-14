@@ -4,14 +4,14 @@
   pkgs,
   ...
 }: let
-  vanilla_sources = import ../sources/vanilla.nix {inherit pkgs;};
+  vanilla_sources = import ../sources/vanilla.nix;
   cfg = config.mineflake.vanilla;
 
   server = pkgs.stdenv.mkDerivation {
     pname = "mineflake-server";
     version = "${cfg.version}";
 
-    jar = vanilla_sources.${cfg.version};
+    jar = pkgs.fetchurl (vanilla_sources.${cfg.version});
     buildInputs = [cfg.java];
     phases = ["installPhase"];
 
@@ -40,42 +40,43 @@ in
     ];
 
     config = mkIf cfg.enable {
+      environment.systemPackages = [server cfg.java pkgs.udev];
+
       users = {
         users.minecraft = {
-          name = "minecraft";
+          name = "mineflake";
           isSystemUser = true;
-          home = "${cfg.dir}";
-          group = "minecraft";
+          group = "mineflake";
+          createHome = false;
         };
-        groups.minecraft = {};
+        groups.mineflake = {};
       };
 
-      environment.systemPackages = [server cfg.java pkgs.udev];
+      systemd.tmpfiles.rules = [
+        "d ${cfg.dir} 0755 mineflake mineflake -"
+        "d ${cfg.dir}/${cfg.name} 0755 mineflake mineflake"
+      ];
+
       systemd.services."mineflake-server" = {
         enable = true;
         wantedBy = ["multi-user.target"];
         serviceConfig = {
           Type = "exec";
-          User = "minecraft";
-          Group = "minecraft";
+          User = "mineflake";
+          Group = "mineflake";
+
+          WorkingDirectory = "${cfg.dir}/${cfg.name}";
+          ExecStart = "${cfg.java}/bin/java ${cfg.flags} -jar ${server}/server.jar";
 
           Restart = "on-failure";
           StandardOutput = "journal";
           StandardError = "journal";
           RemainAfterExit = "no";
         };
-
         path = [pkgs.udev];
 
         preStart = ''
-          mkdir -p ${cfg.dir}
-          mkdir -p ${cfg.dir}/${cfg.name}
-          cp -f ${server}/* ${cfg.dir}/${cfg.name}/
-        '';
-
-        script = ''
-          cd ${cfg.dir}/${cfg.name}
-          exec ${cfg.java}/bin/java ${cfg.flags} -jar server.jar nogui
+          cp -rf ${server}/* ${cfg.dir}/${cfg.name}/
         '';
       };
     };

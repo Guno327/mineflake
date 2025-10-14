@@ -8,13 +8,12 @@ with lib; {
 
   version = mkOption {
     type = types.str;
-    default = "latest";
-    description = "Server version";
+    description = "Server version, exact value depends on type of server";
   };
 
   dir = mkOption {
     type = types.path;
-    default = "/var/lib/minecraft";
+    default = "/var/lib/mineflake";
     description = "Directory to store server files";
   };
 

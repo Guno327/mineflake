@@ -2,5 +2,14 @@
 result
 result-*
 
-# Ignore automatically generated direnv output
+# Ignore mcfetch side effects
+mcfetch/__pycache__/
+mcfetch/tmp
+mcfetch/log/
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
 .direnv
