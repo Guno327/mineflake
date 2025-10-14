@@ -13,7 +13,7 @@ with lib; {
 
   dir = mkOption {
     type = types.path;
-    default = "/var/lib/minecraft";
+    default = "/var/lib/mineflake";
     description = "Directory to store server files";
   };
 

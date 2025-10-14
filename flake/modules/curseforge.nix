@@ -6,12 +6,13 @@
 }: let
   cf_sources = import ../sources/curseforge.nix;
   cfg = config.mineflake.curseforge;
+  pack = cf_sources."${cfg.pack}:${cfg.version}";
 
   server = pkgs.stdenv.mkDerivation {
     pname = "mineflake-server";
-    version = "${cfg.version}";
+    version = "${cfg.pack}:${cfg.version}";
 
-    jar = pkgs.fetchurl (vanilla_sources.${cfg.version});
+    src = pkgs.fetchurl (pack.zip);
     buildInputs = [cfg.java];
     phases = ["installPhase"];
 
@@ -23,20 +24,22 @@
     '';
 
     installPhase = ''
-      mkdir $out
-      cp $jar $out/server.jar
-      cp $serverProperties $out/server.properties
-      cp $eula $out/eula.txt
+      mkdir -p $out
+      cp -r $src/* $out
+
+      chmod +x $out/${pack.script}
     '';
   };
 
   stdOptions = import ../options/std.nix {inherit lib pkgs;};
+  moddedOptions = import ../options/modded.nix {inherit lib pkgs;};
   serverPropertyOptions = import ../options/server-properties.nix {inherit lib;};
 in
   with lib; {
-    options.mineflake.vanilla = mergeAttrsList [
+    options.mineflake.curseforge = mergeAttrsList [
       stdOptions
       serverPropertyOptions
+      moddedOptions
     ];
 
     config = mkIf cfg.enable {
@@ -75,7 +78,7 @@ in
 
         script = ''
           cd ${cfg.dir}/${cfg.name}
-          exec ${cfg.java}/bin/java ${cfg.flags} -jar server.jar nogui
+          exec ./${pack.script}
         '';
       };
     };

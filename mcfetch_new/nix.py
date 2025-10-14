@@ -4,15 +4,15 @@ import requests
 import os
 from rich.progress import Progress
 from hashlib import sha256
-from typing import TextIO
+from typing import TextIO, Dict, Optional
 
 
-def hash_native(url, headers):
+def hash_native(url: str, headers: Dict = {}) -> Optional[str]:
     try:
         # Step 1: Fetch the content
         response = requests.get(url, stream=True, headers=headers)
         if response.status_code != 200:
-            return None
+            return
 
         with open("tmp", "wb") as file:
             file.write(response.content)
@@ -86,39 +86,3 @@ def write_vanilla_module() -> None:
                 write_entry(file, str(row["version"]), row["url"], row["hash"])
                 progress.update(write_task, advance=1)
             file.write("}\n")
-
-
-def write_curseforge_module() -> None:
-    connection = sqlite3.Connection("mineflake.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
-
-    with open(f"../flake/sources/curseforge.nix", "w") as file:
-        res = cursor.execute("SELECT * FROM curseforge WHERE url IS NOT NULL")
-        rows = res.fetchall()
-
-        with Progress() as progress:
-            progress.console.log(f"Found {len(rows)} curseforge packs")
-            write_task = progress.add_task(
-                "Writing curseforge packs to module", total=len(rows)
-            )
-            file.write("{\n")
-            for row in rows:
-                file.write(f'"{row["slug"]}:{row["version"]}"')
-                file.write(" = {\n")
-                file.write("zip = {\n")
-                file.write(f'url = "{row["url"]}";\n')
-                file.write(f'sha256 = "{row["hash"]}";\n')
-                file.write("};\n")
-                file.write(f'script = "{row["script"]}";\n')
-                file.write("};\n\n")
-                progress.update(write_task, advance=1)
-            file.write("}\n")
-
-
-def write_files_module() -> None:
-    return
-
-
-def write_ftb_module() -> None:
-    return
